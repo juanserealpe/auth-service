@@ -8,21 +8,12 @@ public class JwtResponseDTO {
     private Long idAccount;
     private List<String> roles;
 
-    // Constructors
-    public JwtResponseDTO(String token, String refreshToken, Long idAccount, List<String> roles) {
-        this.token = token;
-        this.idAccount = idAccount;
-        this.roles = roles;
-    }
-
     // Constructor without refresh
     public JwtResponseDTO(String token, Long idAccount, List<String> roles) {
         this.token = token;
         this.idAccount = idAccount;
         this.roles = roles;
     }
-
-    public JwtResponseDTO() {}
 
     // Getters y setters
 

@@ -1,5 +1,6 @@
 package co.edu.unicauca.config;
 
+import co.edu.unicauca.services.AccountDetailsService;
 import co.edu.unicauca.utilities.JwtAuthFilter;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -23,14 +24,17 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 public class SecurityConfig {
 
     private final JwtAuthFilter jwtAuthFilter;
+    private final AccountDetailsService accountDetailsService;
 
-    public SecurityConfig(JwtAuthFilter jwtAuthFilter) {
+    public SecurityConfig(JwtAuthFilter jwtAuthFilter, AccountDetailsService accountDetailsService) {
         this.jwtAuthFilter = jwtAuthFilter;
+        this.accountDetailsService = accountDetailsService;
     }
 
     @Bean
     public AuthenticationManager authManager(HttpSecurity http, PasswordEncoder encoder) throws Exception {
         DaoAuthenticationProvider authProvider = new DaoAuthenticationProvider();
+        authProvider.setUserDetailsService(accountDetailsService);
         authProvider.setPasswordEncoder(encoder);
         return new ProviderManager(authProvider);
     }
@@ -46,6 +50,9 @@ public class SecurityConfig {
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/h2-console/**").permitAll()
                         .requestMatchers("/auth/**").permitAll()
+                        .requestMatchers("/degreework/**").permitAll()
+                        .requestMatchers("/director/**").permitAll()
+                        .requestMatchers("/coordinator/**").permitAll()
                         .anyRequest().authenticated()
                 );
 
