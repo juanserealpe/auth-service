@@ -27,9 +27,6 @@ import org.springframework.stereotype.Service;
  *   <li>{@link AccountRepository} para el acceso a datos de las cuentas.</li>
  *   <li>{@link PasswordEncoder} para la codificación segura de contraseñas.</li>
  * </ul>
- *
- * @author Juan
- * @version 1.0
  */
 @Service
 public class AccountService {

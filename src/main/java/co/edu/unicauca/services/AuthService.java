@@ -17,6 +17,10 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
+/**
+ * Servicio encargado de manejar la autenticación de usuarios
+ * y la generación de tokens JWT.
+ */
 @Service
 public class AuthService {
 
@@ -29,11 +33,22 @@ public class AuthService {
     @Autowired
     private AccountRepository _accountRepository;
 
+    /**
+     * Autentica al usuario con las credenciales proporcionadas.
+     *
+     * Si las credenciales son válidas, genera y devuelve un token JWT
+     * junto con la información del usuario autenticado.
+     *
+     * @param loginRequest DTO que contiene el correo y la contraseña.
+     * @return {@link JwtResponseDTO} con el token JWT, el ID del usuario y sus roles.
+     * @throws BadCredentialsException si las credenciales son inválidas.
+     */
     @Transactional
     public JwtResponseDTO authenticateUser(LoginRequestDTO loginRequest) {
-        Logger.info(getClass(), "Attempting login for email: " + loginRequest.getEmail());
+        Logger.info(getClass(), "Intentando iniciar sesión con el correo: " + loginRequest.getEmail());
 
         try {
+            // Autenticar usuario con Spring Security
             Authentication auth = _authenticationManager.authenticate(
                     new UsernamePasswordAuthenticationToken(
                             loginRequest.getEmail(),
@@ -41,22 +56,26 @@ public class AuthService {
                     )
             );
 
+            // Obtener detalles del usuario autenticado
             AccountDetails userDetails = (AccountDetails) auth.getPrincipal();
 
+            // Generar token JWT
             String accessToken = _jwtUtils.generateJwtToken(userDetails);
 
+            // Verificar que la cuenta exista en la base de datos
             Account account = _accountRepository.findById(userDetails.getId())
-                    .orElseThrow(() -> new RuntimeException("Account not found"));
+                    .orElseThrow(() -> new RuntimeException("Cuenta no encontrada"));
 
-
+            // Extraer roles del usuario
             List<String> roles = userDetails.getAuthorities()
                     .stream()
                     .map(a -> a.getAuthority())
                     .toList();
 
-            Logger.success(getClass(), "Login successful for account ID: " + userDetails.getId()
+            Logger.success(getClass(), "Inicio de sesión exitoso para el ID: " + userDetails.getId()
                     + " | Roles: " + roles);
 
+            // Retornar respuesta con token y roles
             return new JwtResponseDTO(
                     accessToken,
                     userDetails.getId(),
@@ -64,8 +83,8 @@ public class AuthService {
             );
 
         } catch (BadCredentialsException e) {
-            Logger.error(getClass(), "Login failed - Invalid credentials");
-            throw new BadCredentialsException("Invalid email or password");
+            Logger.error(getClass(), "Error de inicio de sesión - Credenciales inválidas");
+            throw new BadCredentialsException("Correo o contraseña incorrectos");
         }
     }
 }

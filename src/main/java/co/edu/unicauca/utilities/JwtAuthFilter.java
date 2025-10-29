@@ -14,6 +14,10 @@ import org.springframework.web.filter.OncePerRequestFilter;
 
 import java.io.IOException;
 
+/**
+ * Filtro que intercepta cada solicitud HTTP para validar el token JWT.
+ * Si el token es válido, se establece la autenticación en el contexto de seguridad.
+ */
 @Component
 public class JwtAuthFilter extends OncePerRequestFilter {
 
@@ -25,12 +29,17 @@ public class JwtAuthFilter extends OncePerRequestFilter {
         this.accountRepository = accountRepository;
     }
 
+    /**
+     * Valida el JWT presente en el encabezado "Authorization" de cada petición.
+     * Si el token es correcto, se autentica al usuario en el contexto de Spring Security.
+     */
     @Override
     protected void doFilterInternal(HttpServletRequest req, HttpServletResponse res, FilterChain chain)
             throws ServletException, IOException {
 
         String requestURI = req.getRequestURI();
 
+        // Saltar rutas públicas
         if (shouldNotFilter(req)) {
             chain.doFilter(req, res);
             return;
@@ -41,40 +50,40 @@ public class JwtAuthFilter extends OncePerRequestFilter {
 
             if (header != null && header.startsWith("Bearer ")) {
                 String token = header.substring(7);
-                Logger.info(getClass(), "JWT detected in request to " + requestURI);
+                Logger.info(getClass(), "JWT detectado en la solicitud a " + requestURI);
 
+                // Validar token
                 if (jwtUtils.validateJwtToken(token)) {
                     Long accountId = jwtUtils.getAccountIdFromJwtToken(token);
-                    Logger.success(getClass(), "JWT validated successfully for account ID: " + accountId);
 
                     Account account = accountRepository.findById(accountId)
-                            .orElseThrow(() -> new RuntimeException("Account not found with ID: " + accountId));
+                            .orElseThrow(() -> new RuntimeException("Cuenta no encontrada con ID: " + accountId));
 
+                    // Crear autenticación y establecerla en el contexto
                     AccountDetails accountDetails = new AccountDetails(account);
                     UsernamePasswordAuthenticationToken auth =
                             new UsernamePasswordAuthenticationToken(
-                                    accountDetails,
-                                    null,
-                                    accountDetails.getAuthorities()
-                            );
+                                    accountDetails, null, accountDetails.getAuthorities());
                     SecurityContextHolder.getContext().setAuthentication(auth);
 
-                    Logger.info(getClass(), "Authentication context set for account ID: " + accountId
-                            + " (" + account.getEmail() + ")");
+                    Logger.success(getClass(), "Autenticación establecida para el usuario: " + account.getEmail());
                 } else {
-                    Logger.warn(getClass(), "Invalid JWT received for request to " + requestURI);
+                    Logger.warn(getClass(), "JWT inválido para la solicitud a " + requestURI);
                 }
             } else {
-                Logger.warn(getClass(), "No JWT found in request to " + requestURI);
+                Logger.warn(getClass(), "No se encontró JWT en la solicitud a " + requestURI);
             }
 
         } catch (Exception e) {
-            Logger.error(getClass(), "Cannot set user authentication: " + e.getMessage());
+            Logger.error(getClass(), "Error al procesar autenticación: " + e.getMessage());
         }
 
         chain.doFilter(req, res);
     }
 
+    /**
+     * Define las rutas que no requieren filtrado JWT (públicas o estáticas).
+     */
     @Override
     protected boolean shouldNotFilter(HttpServletRequest request) {
         String path = request.getRequestURI();
