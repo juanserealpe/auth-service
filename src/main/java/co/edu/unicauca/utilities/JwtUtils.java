@@ -55,15 +55,20 @@ public class JwtUtils {
      * @return id de la cuenta (Long)
      */
     public Long getAccountIdFromJwtToken(String token) {
-        String subject = Jwts.parserBuilder()
-                .setSigningKey(Keys.hmacShaKeyFor(jwtSecret.getBytes())) // Verifica la firma con la clave secreta
+        Claims claims = Jwts.parserBuilder()
+                .setSigningKey(Keys.hmacShaKeyFor(jwtSecret.getBytes()))
                 .build()
-                .parseClaimsJws(token) // Parsea y valida el token
-                .getBody()
-                .getSubject(); // Obtiene el campo "subject" del cuerpo del token
+                .parseClaimsJws(token)
+                .getBody();
 
-        return Long.parseLong(subject);
+        Object idValue = claims.get("idAccount");
+        if (idValue == null) {
+            throw new IllegalArgumentException("El token no contiene el claim 'idAccount'");
+        }
+
+        return Long.parseLong(idValue.toString());
     }
+
 
     /**
      * Extrae el correo electrónico (email) almacenado como claim dentro del token JWT.

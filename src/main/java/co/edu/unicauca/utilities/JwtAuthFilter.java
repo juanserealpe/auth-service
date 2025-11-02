@@ -39,7 +39,6 @@ public class JwtAuthFilter extends OncePerRequestFilter {
 
         String requestURI = req.getRequestURI();
 
-        // Saltar rutas públicas
         if (shouldNotFilter(req)) {
             chain.doFilter(req, res);
             return;
@@ -50,23 +49,28 @@ public class JwtAuthFilter extends OncePerRequestFilter {
 
             if (header != null && header.startsWith("Bearer ")) {
                 String token = header.substring(7);
+
+                if (token.isEmpty()) {
+                    Logger.warn(getClass(), "JWT vacío en la solicitud a " + requestURI);
+                    chain.doFilter(req, res);
+                    return;
+                }
+
                 Logger.info(getClass(), "JWT detectado en la solicitud a " + requestURI);
 
-                // Validar token
                 if (jwtUtils.validateJwtToken(token)) {
                     Long accountId = jwtUtils.getAccountIdFromJwtToken(token);
 
                     Account account = accountRepository.findById(accountId)
                             .orElseThrow(() -> new RuntimeException("Cuenta no encontrada con ID: " + accountId));
 
-                    // Crear autenticación y establecerla en el contexto
                     AccountDetails accountDetails = new AccountDetails(account);
                     UsernamePasswordAuthenticationToken auth =
                             new UsernamePasswordAuthenticationToken(
                                     accountDetails, null, accountDetails.getAuthorities());
                     SecurityContextHolder.getContext().setAuthentication(auth);
 
-                    Logger.success(getClass(), "Autenticación establecida para el usuario: " + account.getEmail());
+                    Logger.success(getClass(), "Autenticación establecida para: " + account.getEmail());
                 } else {
                     Logger.warn(getClass(), "JWT inválido para la solicitud a " + requestURI);
                 }
@@ -80,6 +84,7 @@ public class JwtAuthFilter extends OncePerRequestFilter {
 
         chain.doFilter(req, res);
     }
+
 
     /**
      * Define las rutas que no requieren filtrado JWT (públicas o estáticas).
