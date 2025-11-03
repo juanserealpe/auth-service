@@ -16,9 +16,8 @@ public class User {
     @Column(name = "last_names", nullable = false)
     private String lastNames;
 
-    @OneToOne(cascade = CascadeType.ALL, orphanRemoval = true)
-    @JoinColumn(name = "id_user", referencedColumnName = "id_account")
-    @MapsId
+    @OneToOne(cascade = CascadeType.ALL)
+    @JoinColumn(name = "account_id", referencedColumnName = "id_account")
     private Account account;
 
     // Getters & Setters

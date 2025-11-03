@@ -2,8 +2,9 @@ package co.edu.unicauca.controllers;
 
 import co.edu.unicauca.dtos.JwtResponseDTO;
 import co.edu.unicauca.dtos.LoginRequestDTO;
+import co.edu.unicauca.dtos.UserRegisterDTO;
+import co.edu.unicauca.entities.Account;
 import co.edu.unicauca.entities.User;
-import co.edu.unicauca.enums.Role;
 import co.edu.unicauca.services.AuthService;
 import co.edu.unicauca.services.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -53,67 +54,19 @@ public class AuthController {
         }
     }
 
-    /**
-     * Endpoint para registrar un nuevo usuario con el rol de STUDENT.
-     *
-     * @param user objeto User con la información del estudiante.
-     * @return ResponseEntity con el usuario creado o el error correspondiente.
-     */
-    @PostMapping("/register-student")
-    public ResponseEntity<?> registerStudent(@RequestBody User user) {
+    @PostMapping("/register")
+    public ResponseEntity<?> register(@RequestBody UserRegisterDTO request) {
         try {
-            // Registra el usuario con el rol STUDENT
-            User saved = _userService.userRegister(user, Role.STUDENT);
+            User saved = _userService.userRegister(request);
             return ResponseEntity.status(HttpStatus.CREATED).body(saved);
         } catch (IllegalArgumentException e) {
-            // Si hay un error de validación, devuelve 400
             return ResponseEntity.badRequest().body(e.getMessage());
         } catch (Exception e) {
-            // Si ocurre un error general, devuelve 500
+            e.printStackTrace();
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                    .body("An error occurred while registering the student");
+                    .body("An error occurred while registering the user");
         }
     }
 
-    /**
-     * Endpoint para registrar un nuevo usuario con el rol de COORDINATOR.
-     * Idealmente este endpoint debería estar protegido por permisos de administrador.
-     *
-     * @param user objeto User con la información del coordinador.
-     * @return ResponseEntity con el usuario creado o error correspondiente.
-     */
-    @PostMapping("/register-coordinator")
-    public ResponseEntity<?> registerCoordinator(@RequestBody User user) {
-        try {
-            // Registra el usuario con el rol COORDINATOR
-            User saved = _userService.userRegister(user, Role.COORDINATOR);
-            return ResponseEntity.status(HttpStatus.CREATED).body(saved);
-        } catch (IllegalArgumentException e) {
-            return ResponseEntity.badRequest().body(e.getMessage());
-        } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                    .body("An error occurred while registering the coordinator");
-        }
-    }
 
-    /**
-     * Endpoint para registrar un nuevo usuario con el rol de DIRECTOR.
-     * También debería estar protegido por permisos de administrador.
-     *
-     * @param user objeto User con la información del director.
-     * @return ResponseEntity con el usuario creado o error correspondiente.
-     */
-    @PostMapping("/register-director")
-    public ResponseEntity<?> registerDirector(@RequestBody User user) {
-        try {
-            // Registra el usuario con el rol DIRECTOR
-            User saved = _userService.userRegister(user, Role.DIRECTOR);
-            return ResponseEntity.status(HttpStatus.CREATED).body(saved);
-        } catch (IllegalArgumentException e) {
-            return ResponseEntity.badRequest().body(e.getMessage());
-        } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                    .body("An error occurred while registering the director");
-        }
-    }
 }

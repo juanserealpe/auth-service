@@ -2,6 +2,8 @@ package co.edu.unicauca.enums;
 
 public enum Role {
     STUDENT,
-    COORDINATOR,
     DIRECTOR,
+    COORDINATOR,
+    JURY,
+    HEAD_OF_DEPARTMEN;
 }
