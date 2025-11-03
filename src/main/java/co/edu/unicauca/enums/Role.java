@@ -5,5 +5,5 @@ public enum Role {
     DIRECTOR,
     COORDINATOR,
     JURY,
-    HEAD_OF_DEPARTMEN;
+    HEAD_OF_DEPARTMENT;
 }

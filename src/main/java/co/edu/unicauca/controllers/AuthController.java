@@ -3,7 +3,6 @@ package co.edu.unicauca.controllers;
 import co.edu.unicauca.dtos.JwtResponseDTO;
 import co.edu.unicauca.dtos.LoginRequestDTO;
 import co.edu.unicauca.dtos.UserRegisterDTO;
-import co.edu.unicauca.entities.Account;
 import co.edu.unicauca.entities.User;
 import co.edu.unicauca.services.AuthService;
 import co.edu.unicauca.services.UserService;
