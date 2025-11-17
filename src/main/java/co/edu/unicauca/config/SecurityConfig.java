@@ -77,7 +77,13 @@ public class SecurityConfig {
 
                 // Reglas de autorización
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/h2-console/**", "/auth/**").permitAll()
+                        .requestMatchers(
+                                "/h2-console/**",
+                                "/auth/login",
+                                "/auth/register",
+                                "/auth/validate-role/**"
+                        ).permitAll()
+
                         .anyRequest().authenticated()
                 );
 

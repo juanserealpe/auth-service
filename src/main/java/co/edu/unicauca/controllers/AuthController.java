@@ -4,6 +4,8 @@ import co.edu.unicauca.dtos.JwtResponseDTO;
 import co.edu.unicauca.dtos.LoginRequestDTO;
 import co.edu.unicauca.dtos.UserRegisterDTO;
 import co.edu.unicauca.entities.User;
+import co.edu.unicauca.enums.Role;
+import co.edu.unicauca.services.AccountService;
 import co.edu.unicauca.services.AuthService;
 import co.edu.unicauca.services.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -27,6 +29,8 @@ public class AuthController {
     // Servicio que maneja el registro de nuevos usuarios y asignación de roles
     @Autowired
     private UserService _userService;
+    @Autowired
+    AccountService _accountService;
 
     /**
      * Endpoint para autenticar un usuario y generar un token JWT si las credenciales son válidas.
@@ -67,5 +71,29 @@ public class AuthController {
         }
     }
 
+    /**
+     * Endpoint simple para validar si una cuenta tiene un rol específico.
+     * Diseñado para ser consumido de forma síncrona por otros microservicios mediante Feign Client.
+     *
+     * @param accountId ID de la cuenta a validar
+     * @param expectedRole Rol esperado (ej: STUDENT, DIRECTOR, COORDINATOR, etc.)
+     * @return ResponseEntity con boolean: true si tiene el rol, false si no
+     */
+    @GetMapping("/validate-role/{accountId}/{expectedRole}")
+    public ResponseEntity<Boolean> validateUserRole(
+            @PathVariable Long accountId,
+            @PathVariable String expectedRole) {
+        try {
+            Role roleEnum = Role.valueOf(expectedRole.toUpperCase());
 
+            boolean hasRole = _accountService.validateAccountRole(accountId, roleEnum);
+
+            return ResponseEntity.ok(hasRole);
+
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.ok(false);
+        } catch (Exception e) {
+            return ResponseEntity.ok(false);
+        }
+    }
 }

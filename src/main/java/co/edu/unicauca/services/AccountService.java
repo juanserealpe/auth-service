@@ -1,6 +1,7 @@
 package co.edu.unicauca.services;
 
 import co.edu.unicauca.entities.Account;
+import co.edu.unicauca.enums.Role;
 import co.edu.unicauca.repositories.AccountRepository;
 import co.edu.unicauca.utilities.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -85,5 +86,34 @@ public class AccountService {
      */
     public void prepareAccountForRegistration(Account account) {
         account.setPassword(encodePassword(account.getPassword()));
+    }
+    // Agregar este método a la clase AccountService existente
+
+    /**
+     * Valida si una cuenta específica tiene un rol determinado.
+     *
+     * @param accountId ID de la cuenta a validar.
+     * @param role Rol que se desea verificar.
+     * @return {@code true} si la cuenta tiene el rol especificado, {@code false} en caso contrario.
+     * @throws IllegalArgumentException Si la cuenta no existe.
+     */
+    public boolean validateAccountRole(Long accountId, Role role) {
+        Logger.info(getClass(), "Validating role " + role + " for account ID: " + accountId);
+
+        Account account = _accountRepository.findById(accountId)
+                .orElseThrow(() -> {
+                    Logger.error(getClass(), "Account not found with ID: " + accountId);
+                    return new IllegalArgumentException("Account not found with ID: " + accountId);
+                });
+
+        boolean hasRole = account.hasRole(role);
+
+        if (hasRole) {
+            Logger.success(getClass(), "Account ID " + accountId + " has role " + role);
+        } else {
+            Logger.warn(getClass(), "Account ID " + accountId + " does not have role " + role);
+        }
+
+        return hasRole;
     }
 }

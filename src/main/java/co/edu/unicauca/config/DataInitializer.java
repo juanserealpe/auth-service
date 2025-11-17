@@ -64,6 +64,27 @@ public class DataInitializer {
             } catch (Exception e) {
                 System.out.println("[WARN] El usuario COORDINADOR ya existe o el servicio no está disponible.");
             }
+            try {
+                // ==== STUDENT ====
+                User studentUser = new User();
+                studentUser.setNames("Laura");
+                studentUser.setLastNames("Martínez");
+
+                Account studentAccount = new Account();
+                studentAccount.setEmail("laura@unicauca.edu.co");
+                studentAccount.setPassword("123456");
+                studentAccount.setRoles(Set.of(Role.STUDENT));
+
+                UserRegisterDTO coordinatorDTO = new UserRegisterDTO();
+                coordinatorDTO.setUser(studentUser);
+                coordinatorDTO.setAccount(studentAccount);
+
+                restTemplate.postForEntity(AUTH_URL, coordinatorDTO, String.class);
+                System.out.println("[INFO] Usuario COORDINADOR registrado exitosamente.");
+
+            } catch (Exception e) {
+                System.out.println("[WARN] El usuario COORDINADOR ya existe o el servicio no está disponible.");
+            }
         };
     }
 }
