@@ -96,4 +96,26 @@ public class AuthController {
             return ResponseEntity.ok(false);
         }
     }
+    /**
+     * Endpoint para obtener el ID de una cuenta a partir de su email.
+     * Diseñado para ser consumido por otros microservicios mediante Feign Client.
+     *
+     * @param userEmail Email del usuario cuya cuenta se desea buscar
+     * @return ResponseEntity con el ID de la cuenta (Long) si existe
+     */
+    @GetMapping("/account-id")
+    public ResponseEntity<?> getAccountIdByEmail(@RequestParam String userEmail) {
+        try {
+            Long accountId = _accountService.getAccountIdByEmail(userEmail);
+            return ResponseEntity.ok(accountId);
+
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                    .body(e.getMessage());
+
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body("An error occurred while retrieving the account ID");
+        }
+    }
 }

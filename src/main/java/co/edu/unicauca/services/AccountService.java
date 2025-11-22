@@ -116,4 +116,24 @@ public class AccountService {
 
         return hasRole;
     }
+    /**
+     * Obtiene el ID de una cuenta a partir de su email.
+     *
+     * @param email Email de la cuenta a buscar.
+     * @return ID de la cuenta.
+     * @throws IllegalArgumentException Si no existe una cuenta con ese email.
+     */
+    public Long getAccountIdByEmail(String email) {
+        Logger.info(getClass(), "Searching account ID for email: " + email);
+
+        Account account = _accountRepository.findByEmail(email)
+                .orElseThrow(() -> {
+                    Logger.error(getClass(), "Account not found with email: " + email);
+                    return new IllegalArgumentException("Account not found with email: " + email);
+                });
+
+        Logger.success(getClass(), "Account ID found: " + account.getIdAccount() + " for email: " + email);
+
+        return account.getIdAccount();
+    }
 }

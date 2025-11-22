@@ -81,7 +81,8 @@ public class SecurityConfig {
                                 "/h2-console/**",
                                 "/auth/login",
                                 "/auth/register",
-                                "/auth/validate-role/**"
+                                "/auth/validate-role/**",
+                                "/auth/account-id"
                         ).permitAll()
 
                         .anyRequest().authenticated()
